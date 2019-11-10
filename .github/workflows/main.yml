@@ -15,6 +15,16 @@ jobs:
     - name: Setting up Vcpkg
       uses: dldt/setup-vcpkg@v1
       id: vcpkg
+    - name: Fixing artifacts on ubuntu
+      if: matrix.os =='ubuntu'
+      run: |
+        # workaround some case sensitivity issue with GitHub artifacts
+        # Make sure directory name is unique, case insensitive.
+        Move-Item -Path "${{ steps.vcpkg.outputs.export }}/installed/x64-linux/share/catch2/*" -Destination "${{ steps.vcpkg.outputs.export }}/installed/x64-linux/share/Catch2/"
+        Remove-Item -Recurse "${{ steps.vcpkg.outputs.export }}/installed/x64-linux/share/catch2/"
+        Move-Item -Path "${{ steps.vcpkg.outputs.export }}/installed/x64-linux/include/spirv/*" -Destination "${{ steps.vcpkg.outputs.export }}/installed/x64-linux/include/SPIRV/"
+        Remove-Item -Recurse "${{ steps.vcpkg.outputs.export }}/installed/x64-linux/include/spirv/"
+      shell: pwsh
     - name: Uploading artifacts
       uses: actions/upload-artifact@v1
       with:
@@ -45,7 +55,7 @@ jobs:
         os: [ubuntu, windows, macOS]
     runs-on: ${{ matrix.os }}-latest
     steps:
-    - name: Install 7zip
+    - name: Install 7zip for macOS
       if: matrix.os == 'macOS'
       run: brew install p7zip
       shell: pwsh
@@ -67,13 +77,20 @@ jobs:
         $out = "$in.zip"
         7z -mx9 a $out $in
       shell: pwsh
+    - name: Getting release information
+      id: get-release-info2
+      uses: dldt/get-release-info@v1.0.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag-name: ${{ github.ref }}
     - name: Uploading release assets
       uses: actions/upload-release-asset@v1.0.1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.get-release-info.outputs.upload_url }}
-        asset_path: ./${{ github.event.repository.name }}-${{ matrix.os }}-${{ steps.get-release-info.outputs.tag-name }}.zip
-        asset_name: ${{ github.event.repository.name }}-${{ matrix.os }}-${{ steps.get-release-info.outputs.tag-name }}.zip
+        upload_url: ${{ steps.get-release-info2.outputs.upload_url }}
+        asset_path: ./${{ github.event.repository.name }}-${{ matrix.os }}-${{ steps.get-release-info2.outputs.tag-name }}.zip
+        asset_name: ${{ github.event.repository.name }}-${{ matrix.os }}-${{ steps.get-release-info2.outputs.tag-name }}.zip
         asset_content_type: application/zip
         asset_label: Artifacts for ${{ matrix.os }}
