@@ -40,7 +40,7 @@ jobs:
     - name: Creating release
       uses: actions/create-release@v1.0.0
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_LL_TOKEN }}
       with:
         tag_name: ${{ github.ref }}
         release_name: ${{ github.ref }}
@@ -63,7 +63,7 @@ jobs:
       id: get-release-info
       uses: dldt/get-release-info@v1.0.0
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_LL_TOKEN }}
       with:
         tag-name: ${{ github.ref }}
     - name: Downloading artifacts
@@ -81,13 +81,13 @@ jobs:
       id: get-release-info2
       uses: dldt/get-release-info@v1.0.0
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_LL_TOKEN }}
       with:
         tag-name: ${{ github.ref }}
     - name: Uploading release assets
       uses: actions/upload-release-asset@v1.0.1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_LL_TOKEN }}
       with:
         upload_url: ${{ steps.get-release-info2.outputs.upload_url }}
         asset_path: ./${{ github.event.repository.name }}-${{ matrix.os }}-${{ steps.get-release-info2.outputs.tag-name }}.zip
