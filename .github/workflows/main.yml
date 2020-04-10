@@ -24,6 +24,8 @@ jobs:
         Remove-Item -Recurse "${{ steps.vcpkg.outputs.export }}/installed/x64-linux/share/catch2/"
         Move-Item -Path "${{ steps.vcpkg.outputs.export }}/installed/x64-linux/include/spirv/*" -Destination "${{ steps.vcpkg.outputs.export }}/installed/x64-linux/include/SPIRV/"
         Remove-Item -Recurse "${{ steps.vcpkg.outputs.export }}/installed/x64-linux/include/spirv/"
+        Move-Item -Path "${{ steps.vcpkg.outputs.export }}/installed/x64-linux/share/spirv-tools/*" -Destination "${{ steps.vcpkg.outputs.export }}/installed/x64-linux/share/SPIRV-Tools/"
+        Remove-Item -Recurse "${{ steps.vcpkg.outputs.export }}/installed/x64-linux/share/spirv-tools/"
       shell: pwsh
     - name: Uploading artifacts
       uses: actions/upload-artifact@v1
