@@ -16,7 +16,7 @@ jobs:
       if: matrix.os == 'windows'
       shell: pwsh
       run: |
-        Add-Content -Path ".\triplets\x64-windows.cmake" -Value "set(VCPKG_PLATFORM_TOOLSET v141)"
+        Add-Content -Path "./vcpkg/triplets/x64-windows.cmake" -Value "set(VCPKG_PLATFORM_TOOLSET v141)"
     - name: Setting up Vcpkg
       uses: dldt/setup-vcpkg@v1
       id: vcpkg
