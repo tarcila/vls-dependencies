@@ -6,15 +6,29 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu, windows, macOS]
+      fail-fast: false
     runs-on: ${{ matrix.os }}-latest
     steps:
     - name: Checking out source tree
-      uses: actions/checkout@v1
+      uses: actions/checkout@v2
       with:
         submodules: true
     - name: Setting up Vcpkg
       uses: dldt/setup-vcpkg@v1
       id: vcpkg
+    - name: Collecting build logs
+      if: always()
+      shell: pwsh
+      run: |
+        New-Item -ItemType Directory "buildlogs"
+        Get-ChildItem -Path "${{ steps.vcpkg.outputs.vcpkg-root }}/buildtrees" -Filter "*.log" -Recurse
+        Copy-Item -Path "${{ steps.vcpkg.outputs.vcpkg-root }}/buildtrees" -Filter "*.log" -Recurse -Destination "buildlogs"
+    - name: Uploading build logs
+      if: always()
+      uses: actions/upload-artifact@v1
+      with:
+        name: ${{ github.event.repository.name }}-${{ matrix.os }}-${{ github.sha }}-logs
+        path: buildlogs
     - name: Fixing artifacts on ubuntu
       if: matrix.os =='ubuntu'
       run: |
@@ -38,9 +52,9 @@ jobs:
     needs: [build]
     steps:
     - name: Creating release
-      uses: actions/create-release@v1.0.0
+      uses: actions/create-release@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.LL_GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ github.ref }}
         release_name: ${{ github.ref }}
@@ -61,9 +75,9 @@ jobs:
       shell: pwsh
     - name: Getting release information
       id: get-release-info
-      uses: dldt/get-release-info@v1.0.0
+      uses: dldt/get-release-info@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.LL_GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag-name: ${{ github.ref }}
     - name: Downloading artifacts
@@ -79,15 +93,15 @@ jobs:
       shell: pwsh
     - name: Getting release information
       id: get-release-info2
-      uses: dldt/get-release-info@v1.0.0
+      uses: dldt/get-release-info@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.LL_GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag-name: ${{ github.ref }}
     - name: Uploading release assets
-      uses: actions/upload-release-asset@v1.0.1
+      uses: actions/upload-release-asset@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.LL_GITHUB_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.get-release-info2.outputs.upload_url }}
         asset_path: ./${{ github.event.repository.name }}-${{ matrix.os }}-${{ steps.get-release-info2.outputs.tag-name }}.zip
