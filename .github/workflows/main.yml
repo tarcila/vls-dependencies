@@ -17,9 +17,19 @@ jobs:
       shell: pwsh
       run: |
         Add-Content -Path "./vcpkg/triplets/x64-windows.cmake" -Value "set(VCPKG_PLATFORM_TOOLSET v141)"
+    - name: Check for disk space on windows
+      if: matrix.os == 'windows'
+      shell: pwsh
+      run: |
+        wmic logicaldisk get size, freespace, caption
     - name: Setting up Vcpkg
       uses: dldt/setup-vcpkg@v1
       id: vcpkg
+    - name: Check for disk space on windows
+      if: matrix.os == 'windows'
+      shell: pwsh
+      run: |
+        wmic logicaldisk get size, freespace, caption
     - name: Fixing artifacts on ubuntu
       if: matrix.os =='ubuntu'
       run: |
