@@ -26,7 +26,7 @@ jobs:
       uses: dldt/setup-vcpkg@v1
       id: vcpkg
     - name: Check for disk space on windows
-      if: matrix.os == 'windows'
+      if: failure() && matrix.os == 'windows'
       shell: pwsh
       run: |
         wmic logicaldisk get size, freespace, caption
