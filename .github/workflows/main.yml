@@ -6,8 +6,15 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu, windows, macOS]
+        include:
+          - os: ubuntu
+            label: ubuntu-latest
+          - os: windows
+            label: [self-hosted, windows]
+          - os: macOS
+            label: macOS-latest
       fail-fast: false
-    runs-on: ${{ matrix.os }}-latest
+    runs-on: ${{ matrix.label }}
     steps:
     - name: Checking out source tree
       uses: actions/checkout@v2
